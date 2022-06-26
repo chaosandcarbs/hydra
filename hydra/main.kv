@@ -1,0 +1,370 @@
+#:kivy 1.9.0
+
+<hydraManager>:
+    hydraMain:
+    hydraPassword:
+    hydraPasswordNew:
+    hydraView:
+
+<Screen>:
+    on_leave: root.manager.lastScreen = self.name
+
+<hydraMain>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: self.width/25
+        spacing: self.width/40
+
+        Label:
+            text: 'Hydra Password Manager'
+            font_size: self.width/20
+            size: self.texture_size
+            background_color: 0.15,0.2,0.6,0
+            size_hint: 1,0.15
+
+        BoxLayout:
+            id: mainbox
+            orientation: 'vertical'
+            padding: 20
+            spacing: 30
+            size_hint: 1,0.55
+            Button:
+                id: openfilebutton
+                text: 'Open Existing Hydra File'
+                size_hint: 1,0.3
+                on_release: root.showLoadFile()
+            Button:
+                id: newfilebutton
+                text: 'Create New Hydra File'
+                size_hint: 1,0.3
+                on_release: root.showNewFile()
+            Button:
+                id: exitbutton
+                text: 'Exit Hydra'
+                size_hint: 1, 0.3
+                on_release: app.stop()
+        Label:
+            id: mainfooterlabel
+            size_hint: 1,0.3
+            font_size: self.width/30
+            text: root.msgText
+
+
+<LoadDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        padding: self.width/25
+        spacing: self.width/60
+
+        FileChooserListView:
+            id: filechooser
+            rootpath: app.filePathStart
+
+        BoxLayout:
+            size_hint: 1,.1
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Load"
+                on_release: root.loadFile(filechooser.path, filechooser.selection)
+
+<SaveDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        padding: self.width/25
+        spacing: self.width/60
+
+        Label:
+            id: verify
+            size_hint: 1,.5
+            text: 'Save File and Return?'
+
+        BoxLayout:
+            size_hint: 1,.5
+            Button:
+                text: "Save"
+                on_release: root.saveFile()
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+
+
+<NewDialog>:
+    text_input: fileInput
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        padding: self.width/30
+        spacing: self.width/60
+
+        FileChooserListView:
+            id: filechooser
+            rootpath: app.filePathStart
+
+        TextInput:
+            id: fileInput
+            size_hint: 1,.15
+            multiline: False
+
+        BoxLayout:
+            size_hint: 1,.15
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Next"
+                on_release: root.newFile(filechooser.path,fileInput.text)
+
+<NewPassDialog>:
+    text_input: siteInput
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        padding: self.width/25
+        spacing: self.width/60
+
+        TextInput:
+            id: siteInput
+            size_hint: 1,.5
+            multiline: False
+
+        BoxLayout:
+            size_hint: 1,.5
+            Button:
+                text: "Create"
+                on_release: root.newPass(siteInput.text)
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+<ViewPassDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+        padding: self.width/25
+        spacing: self.width/60
+
+        TextInput:
+            id: siteDisplay
+            multiline: False
+            size_hint: 1,.3
+            readonly: True
+            text: root.site
+
+        TextInput:
+            id: pwordDisplay
+            multiline: False
+            size_hint: 1,.3
+            readonly: True
+            text: root.pword
+
+        BoxLayout:
+            size_hint: 1,.4
+            Button:
+                id: copybtn
+                size_hint: 1,.8
+                text: 'Copy'
+                on_release: root.copy(siteDisplay.text)
+            Button:
+                id: cancelbtn
+                size_hint: 1,.8
+                text: 'Cancel'
+                on_release: root.cancel()
+
+<DelPassDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+        padding: self.width/25
+        spacing: self.width/60
+
+        Label:
+            id: warnDisplay
+            size_hint: 1,.3
+            text: 'Are you sure you want to delete:'
+
+        Label:
+            id: siteDisplay
+            size_hint: 1,.3
+            text: root.site
+
+        BoxLayout:
+            size_hint: 1,.3
+            Button:
+                id: copybtn
+                text: 'Delete'
+                on_release: root.delete(siteDisplay.text)
+            Button:
+                id: cancelbtn
+                text: 'Cancel'
+                on_release: root.cancel()
+
+
+
+<hydraPassword>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: self.width/25
+        spacing: self.width/25
+
+        Label:
+            text: 'Hydra Password Manager'
+            font_size: self.width/20
+            size: self.texture_size
+            background_color: 0.15,0.2,0.6,0
+            size_hint: 1,0.15
+
+        GridLayout:
+            id: loginForm
+            cols: 2
+            size_hint: 1,0.1
+            row_force_default: True
+            row_default_height: self.height*0.75
+            Label:
+                text: 'Please Enter Password'
+            TextInput:
+                id: loginInput
+                password: True
+                multiline: False
+                on_text_validate: root.onPwd()
+        Button:
+            id: loginbutton
+            text: 'Unlock'
+            size_hint: 1,0.1
+            on_release: root.hLogin()
+
+        Button:
+            id: cancelbutton
+            text: 'Return to Menu'
+            size_hint: 1,0.1
+            on_release:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'main'
+
+        Label:
+            id: loginspacelabel
+            text: ''
+            size_hint: 1,0.45
+
+        Label:
+            id: loginfooterlabel
+            size_hint: 1,0.1
+            text: root.msgText
+
+<hydraPasswordNew>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: self.width/25
+        spacing: self.width/25
+
+        Label:
+            text: 'Hydra Password Manager'
+            font_size: self.width/20
+            size: self.texture_size
+            background_color: 0.15,0.2,0.6,0
+            size_hint: 1,0.15
+
+        GridLayout:
+            id: loginForm
+            cols: 2
+            size_hint: 1,0.1
+            row_force_default: True
+            row_default_height: self.height*0.75
+            Label:
+                text: 'Please Enter Password'
+            TextInput:
+                id: loginInput
+                password: True
+                multiline: False
+                on_text_validate: root.onPwd()
+            Label:
+                text: 'Please Verify Password'
+            TextInput:
+                id: loginInput2
+                password: True
+                multiline: False
+                on_text_validate: root.onPwd2()
+        Button:
+            id: loginbutton
+            text: 'Set Password'
+            size_hint: 1,0.1
+            on_release: root.hLogin()
+
+        Button:
+            id: cancelbutton
+            text: 'Return to Menu'
+            size_hint: 1,0.1
+            on_release:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'main'
+
+        Label:
+            id: loginspacelabel
+            text: ''
+            size_hint: 1,0.45
+
+        Label:
+            id: loginfooterlabel
+            size_hint: 1,0.1
+            text: root.msgText
+
+
+<hydraView>:
+    passwordList: passwordList
+    BoxLayout:
+        orientation: 'vertical'
+        padding: self.width/25
+        spacing: self.width/25
+
+        Label:
+            text: 'Hydra Password Manager'
+            font_size: self.width/20
+            size: self.texture_size
+            background_color: 0.15,0.2,0.6,0
+            size_hint: 1,0.15
+
+        GridLayout:
+            id: buttonList
+            cols: 3
+            size_hint: 1, 0.1
+            Button:
+                id: newButton
+                text: 'New Password'
+                on_release: root.showNewPass()
+
+            Button:
+                id: saveButton
+                text: 'Save File'
+                on_release: root.showSaveFile()
+
+            Button:
+                id: exitButton
+                text: 'Exit'
+                on_release: root.manager.current = 'main'
+
+        BoxLayout:
+            id: passwordList
+            size_hint: 1, 0.6
+
+
+        Label:
+            id: loginspacelabel
+            text: ''
+            size_hint: 1,0.05
+
+        Label:
+            id: loginfooterlabel
+            size_hint: 1,0.1
+            text: root.msgText
