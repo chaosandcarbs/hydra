@@ -35,6 +35,7 @@ from kivy.uix.popup import Popup
 from kivy.utils import platform
 from Crypto.Cipher import AES
 import os, random, struct, hashlib, pickle, sys, time, logging
+from os.path import dirname
 
 
 
@@ -419,7 +420,7 @@ class hydraApp(App):
 
     def build(self):
         self.title = 'Hydra v0.1'
-        Builder.load_file('main.kv')
+        Builder.load_file(os.path.join(dirname(__file__), 'main.kv'))
         self.sm = ScreenManager()
         self.sm.lastScreen = ''
         self.platformChecks()
