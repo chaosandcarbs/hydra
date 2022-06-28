@@ -1,5 +1,11 @@
 #:kivy 1.9.0
 
+<HeaderLabel@Label>:
+    text: 'Hydra Password Manager'
+    font_size: self.width/20
+    background_color: 0.15,0.2,0.6,0
+    size_hint: 1,0.1
+
 <hydraManager>:
     hydraMain:
     hydraPassword:
@@ -15,12 +21,7 @@
         padding: self.width/25
         spacing: self.width/40
 
-        Label:
-            text: 'Hydra Password Manager'
-            font_size: self.width/20
-            size: self.texture_size
-            background_color: 0.15,0.2,0.6,0
-            size_hint: 1,0.15
+        HeaderLabel:
 
         BoxLayout:
             id: mainbox
@@ -28,20 +29,19 @@
             padding: 20
             spacing: 30
             size_hint: 1,0.55
+            row_force_default: True
+            row_default_height: dp(10)
             Button:
                 id: openfilebutton
                 text: 'Open Existing Hydra File'
-                size_hint: 1,0.3
                 on_release: root.showLoadFile()
             Button:
                 id: newfilebutton
                 text: 'Create New Hydra File'
-                size_hint: 1,0.3
                 on_release: root.showNewFile()
             Button:
                 id: exitbutton
                 text: 'Exit Hydra'
-                size_hint: 1, 0.3
                 on_release: app.stop()
         Label:
             id: mainfooterlabel
@@ -137,6 +137,7 @@
             id: siteInput
             size_hint: 1,.5
             multiline: False
+            write_tab: False
 
         BoxLayout:
             size_hint: 1,.5
@@ -219,25 +220,21 @@
         padding: self.width/25
         spacing: self.width/25
 
-        Label:
-            text: 'Hydra Password Manager'
-            font_size: self.width/20
-            size: self.texture_size
-            background_color: 0.15,0.2,0.6,0
-            size_hint: 1,0.15
+        HeaderLabel:
 
         GridLayout:
             id: loginForm
             cols: 2
             size_hint: 1,0.1
             row_force_default: True
-            row_default_height: self.height*0.75
+            row_default_height: dp(30)
             Label:
                 text: 'Please Enter Password'
             TextInput:
                 id: loginInput
                 password: True
                 multiline: False
+                write_tab: False
                 on_text_validate: root.onPwd()
         Button:
             id: loginbutton
@@ -269,25 +266,21 @@
         padding: self.width/25
         spacing: self.width/25
 
-        Label:
-            text: 'Hydra Password Manager'
-            font_size: self.width/20
-            size: self.texture_size
-            background_color: 0.15,0.2,0.6,0
-            size_hint: 1,0.15
+        HeaderLabel:
 
         GridLayout:
             id: loginForm
             cols: 2
             size_hint: 1,0.1
             row_force_default: True
-            row_default_height: self.height*0.75
+            row_default_height: dp(30)
             Label:
                 text: 'Please Enter Password'
             TextInput:
                 id: loginInput
                 password: True
                 multiline: False
+                write_tab: False
                 on_text_validate: root.onPwd()
             Label:
                 text: 'Please Verify Password'
@@ -295,6 +288,7 @@
                 id: loginInput2
                 password: True
                 multiline: False
+                write_tab: False
                 on_text_validate: root.onPwd2()
         Button:
             id: loginbutton
@@ -328,17 +322,14 @@
         padding: self.width/25
         spacing: self.width/25
 
-        Label:
-            text: 'Hydra Password Manager'
-            font_size: self.width/20
-            size: self.texture_size
-            background_color: 0.15,0.2,0.6,0
-            size_hint: 1,0.15
+        HeaderLabel:
 
         GridLayout:
             id: buttonList
             cols: 3
             size_hint: 1, 0.1
+            row_force_default: True
+            row_default_height: dp(35)
             Button:
                 id: newButton
                 text: 'New Password'
@@ -354,15 +345,21 @@
                 text: 'Exit'
                 on_release: root.manager.current = 'main'
 
-        BoxLayout:
-            id: passwordList
-            size_hint: 1, 0.6
+        ScrollView:
+            id: passwordScroll
+            #do_scroll_x: False
+            do_scroll_y: True
+            size_hint: 1, .7
+            GridLayout:
+                id: passwordList
+                size_hint: 1,None
+                cols: 3
+                #size_hint_y: None
+                height: self.minimum_height
+                row_force_default: True
+                row_default_height: dp(30)
+                spacing: 10
 
-
-        Label:
-            id: loginspacelabel
-            text: ''
-            size_hint: 1,0.05
 
         Label:
             id: loginfooterlabel
