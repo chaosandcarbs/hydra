@@ -1,17 +1,26 @@
 #!/usr/bin/env python3
 '''
-   hydra.py
+Hydra - A simple password manager that stores passwords using AES
 
-   Generates, protects, and stores passwords.
+    main.py
 
-   Requires:
-      python3
-      pycrypto or pycrptodome
-      pickle
-      kivy
+    Requires:
+        python3
+        pycrypto or pycrptodome
+        pickle
+        kivy
+
+    To build for windows:
+        Requires PyInstaller
+        Requires Microsoft Visual C++ Runtimes
+
+    To build for Android:
+        Requires Buildozer
+        If building in Windows - use wsl as this requires linux
+    
 '''
 from __future__ import unicode_literals
-__version__ = '0.1'
+__version__ = '0.1.5'
 
 '''
     Imports
@@ -19,6 +28,7 @@ __version__ = '0.1'
 from functools import partial
 from kivy.app import App
 from kivy.core.clipboard import Clipboard, CutBuffer
+from kivy.core.window import Window
 from kivy.uix.widget import Widget
 from kivy.lang import Builder
 from kivy.uix.textinput import TextInput
@@ -34,7 +44,7 @@ from kivy.properties import NumericProperty, StringProperty, BooleanProperty,\
 from kivy.uix.popup import Popup
 from kivy.utils import platform
 from Crypto.Cipher import AES
-import os, random, struct, hashlib, pickle, sys, time, logging
+import os, random, struct, hashlib, pickle, logging
 from os.path import dirname
 
 
@@ -51,6 +61,9 @@ filePath = ''
 '''
 
 class hydraMain(Screen):
+    '''
+        hydraMain is the main menu screen
+    '''
     msgText = StringProperty()
 
     def __init__(self, **kwargs):
@@ -60,57 +73,71 @@ class hydraMain(Screen):
             logging.info('Platform: '+self.manager.platform)
 
     def showLoadFile(self):
+        ''' showLoadFile - helper function that triggers popup for loadFile() '''
         content = LoadDialog(loadFile=self.loadFile, cancel=self.dismissPopup)
         self._popup = Popup(title="Load file", content=content,
                             size_hint=(0.9, 0.72))
         self._popup.open()
 
     def loadFile(self, path, name):
-        global filePath
-        filePath = path
-        global fileName
-        logging.info('Entered loadFile')
-        if(isinstance(name,list)):
-            fileName = os.path.basename(name[0])
-            logging.info('list: '+str(len(name)))
+        ''' loadFile - picks the file to load, and takes user to hydraPassword '''
+        if(name == None or name == '' or len(name) == 0):
+            pass
         else:
-            fileName = name
-            logging.info('name')
+            global filePath
+            filePath = path
+            global fileName
+            logging.info('Entered loadFile')
+            if(isinstance(name,list)): #final check; this may be a string or list
+                fileName = os.path.basename(name[0])
+            else:
+                fileName = name
 
-        logging.info('Path: '+filePath)
-        logging.info('Name: '+fileName)
-        #with open(os.path.join(self.filePath, self.fileName)) as stream:
-        #    self.text_input.text = stream.read()
-        self.dismissPopup()
-        nextScreen = 'password'
-        self.manager.current = nextScreen
+            logging.info('Path: '+filePath)
+            logging.info('Name: '+fileName)
+            self.dismissPopup()
+            nextScreen = 'password'
+            self.manager.current = nextScreen
 
 
     def showNewFile(self):
+        ''' showNewFile - helper function that triggers popup for newFile() '''
         content = NewDialog(newFile=self.newFile, cancel=self.dismissPopup)
         self._popup = Popup(title="New File", content=content,
                             size_hint=(0.9, 0.72))
         self._popup.open()
 
     def newFile(self, path, filename):
-        global filePath
-        global fileName
-        logging.info('Entered newFile')
-        if(path != '' and filename[0] != ''):
-            filePath = path
-            fileName = filename
+        ''' newFile - picks the file to create, takes user to hydraPasswordNew '''
+        if(filename == None or filename == ''):
+            pass
         else:
-            fileName = 'hydra_passwords'
-        self.dismissPopup()
-        nextScreen = 'password_new'
-        self.manager.current = nextScreen
+            global filePath
+            global fileName
+            logging.info('Entered newFile')
+            if(path != '' and filename[0] != ''):
+                filePath = path
+                fileName = filename
+            else:
+                fileName = 'hydra_passwords'
+            self.dismissPopup()
+            nextScreen = 'password_new'
+            self.manager.current = nextScreen
 
 
     def dismissPopup(self):
+        ''' dismissPopup - used by popup functions to dismiss themselves '''
         self._popup.dismiss()
 
 
 class hydraPasswordNew(Screen):
+    '''
+        hydraPasswordNew covers passwords for new files.
+
+        TODO: This was when I was initially learning Kivy;
+            need to remove this and move all functionality
+            to the hydraPassword class
+    '''
     msgText = StringProperty()
     pwdText = StringProperty()
     pwdText2 = StringProperty()
@@ -138,6 +165,9 @@ class hydraPasswordNew(Screen):
             self.manager.lastScreen = 'password_new'
 
 class hydraPassword(Screen):
+    '''
+        hydraPassword handles password entry for loading files
+    '''
     msgText = StringProperty()
     pwdText = StringProperty()
     def __init__(self, **kwargs):
@@ -156,18 +186,32 @@ class hydraPassword(Screen):
         self.manager.lastScreen = 'password'
 
 class hydraView(Screen):
+    '''
+        hydraView is the primary screen for viewing password information
+
+        Ideally, on load, this will read passwords from the encrypted container
+            into a pickle file, load the pickle into memory, and then delete the
+            pickle, leaving the original encrypted file on disk while using.
+
+        File writes only happen when a user hits the save button - writing to a
+            pickle, encrypted the pickle into another file, and again removing
+            the pickle file. The app should then return to the hydraMain screen
+
+        Passwords in memory should be deleted on exit for hitting either the
+            save or exit button. Should the app crash, the original encrypted
+            container should still exist on disk. 
+    '''
     pwdText = StringProperty()
     msgText = StringProperty()
     pList = {}
     sv = ObjectProperty()
 
-    def _setPwd(self, pwd):
-        self.pwdText = pwd
-
     def __init__(self, **kwargs):
+        ''' standard init '''
         super(hydraView, self).__init__(**kwargs)
 
     def on_leave(self, *args):
+        ''' on_leave event - make sure we set the variables to empty '''
         global fileName, filePath
         fileName = ''
         filePath = ''
@@ -176,6 +220,12 @@ class hydraView(Screen):
         self.listUpdate()
 
     def on_enter(self, *args):
+        ''' on_enter event -
+
+            Check variables are set properly, decrypt the file, load passwords
+                into memory. Lastly, update the scrollview with the password
+                elements view listUpdate().
+        '''
         global fileName, filePath
         if(self.manager != None):
             self.pwdText = self.manager.get_screen(self.manager.lastScreen).ids.loginInput.text
@@ -202,34 +252,27 @@ class hydraView(Screen):
             self.msgText = 'Something Went Wrong! No Manager Object'
 
     def listUpdate(self):
+        ''' listUpdate() - Updates the password list in hydraView '''
         logging.info('Updating list of: '+str(len(self.pList)))
         titleWidth = 0.50
         viewWidth = 0.30
         delWidth = 0.20
 
         self.clean()
-        self.sv = ScrollView()
-        self.passwordList.add_widget(self.sv)
-        container = GridLayout(cols=3)
-        self.sv.add_widget(container)
-        container.add_widget(Label(text='Copy Password', size_hint_x=titleWidth))
-        container.add_widget(Label(text='View Pass', size_hint_x=viewWidth))
-        container.add_widget(Label(text='Delete', size_hint_x=delWidth))
-        logging.info('Adding password list to widgets')
+        self.passwordList.add_widget(Label(text='Copy Password'))
+        self.passwordList.add_widget(Label(text='View Pass'))
+        self.passwordList.add_widget(Label(text='Delete'))
         if(len(self.pList.keys()) > 0):
             for site in self.pList.keys():
                 logging.info('Adding Site: '+site)
+
+                logging.info('Adding password list to widgets')
                 copyCallback = partial(self.copyPass, site)
-                #container.add_widget(Button(text=site, on_release=self.copyPass,
-                #                        size_hint_x=titleWidth))
-                container.add_widget(Button(text=site, on_release=copyCallback,
-                                        size_hint_x=titleWidth))
+                self.passwordList.add_widget(Button(text=site, on_release=copyCallback))
                 viewCallback = partial(self.viewPass, site)
-                container.add_widget(Button(text='View', on_release=viewCallback,
-                                        size_hint_x=viewWidth))
+                self.passwordList.add_widget(Button(text='View', on_release=viewCallback))
                 delCallback = partial(self.delPass, site)
-                container.add_widget(Button(text='Delete', on_release=delCallback,
-                                        size_hint_x=delWidth))
+                self.passwordList.add_widget(Button(text='Delete', on_release=delCallback))
 
     def copyPass(self, *args):
         logging.info('Copying: '+args[0])
@@ -256,13 +299,13 @@ class hydraView(Screen):
         content = ViewPassDialog(site=args[0],pword=self.pList[args[0]],
                                 copy=self.copyPass, cancel=self.dismissPopup)
         self._popup = Popup(title="View Password", content=content,
-                            size_hint=(0.7,0.35))
+                            size_hint=(0.7,0.30))
         self._popup.open()
 
     def showSaveFile(self):
         content = SaveDialog(saveFile=self.saveFile,cancel=self.dismissPopup)
         self._popup = Popup(title="Save File", content=content,
-                            size_hint=(0.7,0.3))
+                            size_hint=(0.7,0.25))
         self._popup.open()
 
     def newPass(self, siteInput):
@@ -274,23 +317,24 @@ class hydraView(Screen):
     def showNewPass(self):
         content = NewPassDialog(newPass=self.newPass,cancel=self.dismissPopup)
         self._popup = Popup(title="Creat New Password", content=content,
-                            size_hint=(0.7,0.3))
+                            size_hint=(0.7,0.25))
         self._popup.open()
 
     def genPass(self):
+        ''' genPass - generates a random password '''
+        #TODO: make length/alphabet variable via setting.
+        #   Note that length generally trumps complexity; this should suffice for now
         alphabet = "abcdefghijklmnopqrstuvwxzyABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]()"
-        length = 24
+        length = 30
         pw = ""
         for i in range(length):
-            next_index = random.randrange(len(alphabet))
-            pw = pw + alphabet[next_index]
+            pw = pw + alphabet[random.randrange(len(alphabet))]
         return pw
 
     def dismissPopup(self):
         self._popup.dismiss()
 
     def saveFile(self):
-        #get the key
         global filePath
         global fileName
         key = hashlib.sha256(self.pwdText.encode('utf-8')).digest()
@@ -303,9 +347,6 @@ class hydraView(Screen):
         self.dismissPopup()
         nextScreen = 'main'
         self.manager.current = nextScreen
-
-    def closeView(self):
-        pass
 
     def openFile(self):
         global fileName
@@ -358,7 +399,6 @@ class hydraView(Screen):
         if not out_filename:
             out_filename = in_filename + '.hydra'
 
-        #iv = ''.join(chr(random.randint(0, 0xFF)) for i in range(16))
         iv = bytes(os.urandom(16))
         encryptor = AES.new(key, AES.MODE_CBC, iv)
         filesize = os.path.getsize(in_filename)
@@ -374,7 +414,6 @@ class hydraView(Screen):
                         break
                     elif len(chunk) % 16 != 0:
                         chunk += bytes((' ' * (16 - len(chunk) % 16)).encode('utf-8'))
-
                     outfile.write(encryptor.encrypt(chunk))
 
 class ViewPassDialog(FloatLayout):
@@ -446,8 +485,10 @@ class hydraApp(App):
                     exit()
             loadingscreen.hide_loading_screen()
             filePathSeparator = '/'
+            Window.fullscreen = 'auto'
         elif platform == 'win':
             self.filePathStart = '/'
+            Window.size = (600,800)
         else:
             self.filePathStart = '.'
         self.curPlatform = platform
@@ -456,8 +497,6 @@ class hydraApp(App):
         content = SaveDialog(saveFile='',text_input='',cancel=self.dismissPopup)
         self._popup = Popup(title='Exit',content=content)
         return True
-
-
 
 
 
