@@ -41,7 +41,7 @@ I plan to eventually get it on the Play Store...eventually...until then you'll h
 You'll need some kind of 'nix (Linux/BSD/etc. type system) to build for Android. I'm doing it in Windows 10 using the Windows Subsystem for Linux (WSL) and Ubuntu 20.04. It's worth reading up on the [Buildozer Documentation for Windows 10](https://buildozer.readthedocs.io/en/latest/installation.html#targeting-android ) and the [Microsoft WSL documentation](https://docs.microsoft.com/en-us/windows/wsl/install).
 
 ## Running with Python 3
-The hydra/ folder has the associated hydra.py and hydra.kv  (kivy) file. You'll want to make sure the following are installed first:
+The hydra/ folder has the associated main.py and main.kv  (kivy) file. You'll want to make sure the following are installed first:
 
 ```
 python -m pip install --upgrade pip wheel setuptools
@@ -55,5 +55,5 @@ python -m pip install pycryptodome
 
 Just run the code like you would any other python script:
 ```
-python hydra.py
+python main.py
 ```
