@@ -1,7 +1,7 @@
 # hydra
 A simple, cross-platform password manager using python+kivy. Portable for desktop and android. 
 
-Hydra can create, read, and edit password files, and store them in an AES-encrypted container on disk. There's currently no cloud integration; I simply use Google Drive (or whatever app you like) to manage the password file(s) and push/pull with my desktop/laptops/phones, since Drive is locked down to your Google account and the files are AES encrypted in addition.
+Hydra can create, read, and edit AES-encrypted password file containers on disk. There's currently no cloud integration; I simply use Google Drive (or whatever app you like) to manage the password file(s) and push/pull with my desktop/laptops/phones, since Drive is locked down to your Google account and the files are AES encrypted in addition.
 
 Considering automating this feature, but I find that after the initial creation and adding all my common sites, I really don't update the password files all that often. 
 
@@ -62,3 +62,10 @@ Just run the code like you would any other python script:
 ```
 python main.py
 ```
+
+## That's cool and all, but how does it work? (a.k.a. I'm too lazy to read the source code)
+Most of the code is all about the GUI, and the bulk of the size of the compiled packages are because of dependencies (kivy for the GUI, Microsoft Visual C++, python interpreter, etc.). 
+
+That said, the core of the program essentially creates/decrypts a file on disk assumed to be an [AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard)-encrypted [pickle](https://docs.python.org/3/library/pickle.html) file, loads it into memory as a python [dictionary](https://docs.python.org/3/tutorial/datastructures.html#dictionaries) and allows you to interact with it (by creating new passwords, deleting old ones, etc.). When finished, if you clicked "save" the app will save the dictionary back to a pickle and re-encrypt it (if you clicked save), and if you cliked "exit" the original encrypted file is unmodified. 
+
+That's...really all there is to it. I did say it was a *simple* password manager :). 
