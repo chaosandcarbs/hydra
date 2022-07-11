@@ -11,8 +11,11 @@ If you forget the password to decrypt a file, it is non-recoverable by design.
 ### No, Really
 Don't forget your password
 
-## Running as a Windows Executable (.exe)
-I have working versions of a .exe (Windows Installer) and Android APK file available in the [Releases](https://github.com/chaosandcarbs/hydra/releases). 
+## Releases
+I have working versions of the python source code, a .exe (Windows Installer), and Android APK file available in the [Releases](https://github.com/chaosandcarbs/hydra/releases). 
+
+## Running as a Windows Executable (easiest)
+Download the executable in the current release on GitHub. It's a simple installer file, and will place the required files in C:\Program Files\Hydra by default, and create shortcuts on both the desktop and start menu.
 
 ### If you want to build your own .exe with PyInstaller
 The [kivy website](https://kivy.org/doc/stable/guide/packaging-windows.html) has the best information (read it all - it will make your life simpler). 
