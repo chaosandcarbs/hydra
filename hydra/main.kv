@@ -133,17 +133,31 @@
         padding: self.width/25
         spacing: self.width/60
 
-        TextInput:
-            id: siteInput
-            size_hint: 1,.5
-            multiline: False
-            write_tab: False
+        GridLayout:
+            size_hint: 1,0.8
+            cols: 2
+            row_force_default: True
+            row_default_height: dp(30)
+            cols_minimum: {0:200,1:100}
+            spacing: dp(5)
 
-        BoxLayout:
-            size_hint: 1,.5
+            Label:
+                id: siteLabel
+                text: "Service Name:"
+            Label:
+                id: lenLabel
+                text: "PW Length:"
+            TextInput:
+                id: siteInput
+                multiline: False
+                write_tab: False
+            TextInput:
+                id: lenInput
+                multiline: False
+                write_tab: False
             Button:
                 text: "Create"
-                on_release: root.newPass(siteInput.text)
+                on_release: root.newPass(siteInput.text,lenInput.text)\
             Button:
                 text: "Cancel"
                 on_release: root.cancel()
