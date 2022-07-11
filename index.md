@@ -1,7 +1,9 @@
 # hydra
-A simple, python-based password manager using kivy. Portable for desktop and android. 
+A simple, cross-platform password manager using python+kivy. Portable for desktop and android. 
 
-Create, read, and edit password files, and store them in an AES-encrypted container on disk. 
+Hydra can create, read, and edit password files, and store them in an AES-encrypted container on disk. There's currently no cloud integration; I simply use Google Drive (or whatever app you like) to manage the password file(s) and push/pull with my desktop/laptops/phones, since Drive is locked down to your Google account and the files are AES encrypted in addition.
+
+Considering automating this feature, but I find that after the initial creation and adding all my common sites, I really don't update the password files all that often. 
 
 ## Warnings
 If you forget the password to decrypt a file, it is non-recoverable by design. 
@@ -9,8 +11,8 @@ If you forget the password to decrypt a file, it is non-recoverable by design.
 ### No, Really
 Don't forget your password
 
-## Running with .exe
-I have working versions of a .exe (Windows Installer) and Android APK file available in the [Releases](https://github.com/chaosandcarbs/hydra/releases). They are alternatively hosted on [Google Drive](https://drive.google.com/drive/folders/1XiMYEtU7TUfKFg8MLPEMdbtiZCadOnI_?usp=sharing).
+## Running as a Windows Executable (.exe)
+I have working versions of a .exe (Windows Installer) and Android APK file available in the [Releases](https://github.com/chaosandcarbs/hydra/releases). 
 
 ### If you want to build your own .exe with PyInstaller
 The [kivy website](https://kivy.org/doc/stable/guide/packaging-windows.html) has the best information (read it all - it will make your life simpler). 
