@@ -20,7 +20,7 @@ Hydra - A simple password manager that stores passwords using AES
     
 '''
 from __future__ import unicode_literals
-__version__ = '0.1.5'
+__version__ = '0.2.0'
 
 '''
     Imports
@@ -29,18 +29,12 @@ from functools import partial
 from kivy.app import App
 from kivy.core.clipboard import Clipboard, CutBuffer
 from kivy.core.window import Window
-from kivy.uix.widget import Widget
 from kivy.lang import Builder
-from kivy.uix.textinput import TextInput
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.button import Button
-from kivy.properties import NumericProperty, StringProperty, BooleanProperty,\
-    ListProperty, ObjectProperty
+from kivy.properties import StringProperty, ObjectProperty
 from kivy.uix.popup import Popup
 from kivy.utils import platform
 from Crypto.Cipher import AES
@@ -71,6 +65,7 @@ class hydraMain(Screen):
         self.msgText = 'Welcome to Hydra!'
         if(self.manager):
             logging.info('Platform: '+self.manager.platform)
+            
 
     def showLoadFile(self):
         ''' showLoadFile - helper function that triggers popup for loadFile() '''
@@ -308,9 +303,9 @@ class hydraView(Screen):
                             size_hint=(0.7,0.25))
         self._popup.open()
 
-    def newPass(self, siteInput):
+    def newPass(self, siteInput, lenInput):
         if(siteInput != ''):
-            self.pList[siteInput] = self.genPass()
+            self.pList[siteInput] = self.genPass(int(lenInput))
             self.dismissPopup()
             self.listUpdate()
 
@@ -320,13 +315,12 @@ class hydraView(Screen):
                             size_hint=(0.7,0.25))
         self._popup.open()
 
-    def genPass(self):
+    def genPass(self, length):
         ''' genPass - generates a random password '''
         #TODO: make length/alphabet variable via setting.
         #   Note that length generally trumps complexity; this should suffice for now
         alphabet = "abcdefghijklmnopqrstuvwxzyABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]()"
-        length = 30
-        pw = ""
+        pw = ''
         for i in range(length):
             pw = pw + alphabet[random.randrange(len(alphabet))]
         return pw
@@ -489,8 +483,15 @@ class hydraApp(App):
         elif platform == 'win':
             self.filePathStart = '/'
             Window.size = (600,800)
+            try:
+                #for bundling in a .exe - will fail if run as a script
+                import pyi_splash
+                pyi_splash.close()
+            except:
+                logging.info('Could not import pyi_splash...running as script?')
         else:
-            self.filePathStart = '.'
+            self.filePathStart = '/'
+            Window.size = (600,800)
         self.curPlatform = platform
 
     def on_request_close(self, *args):
