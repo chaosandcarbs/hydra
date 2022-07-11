@@ -8,11 +8,16 @@ Considering automating this feature, but I find that after the initial creation 
 ## Warnings
 If you forget the password to decrypt a file, it is non-recoverable by design. 
 
-### No, Really
-Don't forget your password
-
 ## Releases
 I have working versions of the python source code, a .exe (Windows Installer), and Android APK file available in the [Releases](https://github.com/chaosandcarbs/hydra/releases). 
+
+## Usage
+In Windows you can run the app installer to make life easy, or simply use the .py, .kv files if you're comfortable with Python. 
+On Android, you'll want to install the APK file. 
+
+If you don't already have a hydra password file, your first run you'll want to create one, and use a good password to secure it (these are the keys to the kingdom, after all). I like to end them in ".hydra" (for example: secure.hydra, pass.hydra, etc.) but that's currently not enforced. Then create as many sites/services as you like; every time you click "New Password" it will ask you the name of the account/site/service and password length to generate (I suggest using the maximum allowed by the account/site/service; usually 15-30). Hydra will create a unique, random, secure password.
+
+Nothing is stored on disk until you click "Save File". Clicking "Exit" will leave a previously opened file exactly how it was, and negate creating a new file. 
 
 ## Running as a Windows Executable (easiest)
 Download the executable in the current release on GitHub. It's a simple installer file, and will place the required files in C:\Program Files\Hydra by default, and create shortcuts on both the desktop and start menu.
