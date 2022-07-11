@@ -1,5 +1,5 @@
 # hydra
-A simple, cross-platform password manager using python+kivy. Portable for desktop and android. 
+A simple, cross-platform password manager using python+kivy. Run anywhere with Python, or use the generated .exe installer or apk file for your Windows or Android device. 
 
 Hydra can create, read, and edit AES-encrypted password file containers on disk. There's currently no cloud integration; I simply use Google Drive (or whatever app you like) to manage the password file(s) and push/pull with my desktop/laptops/phones, since Drive is locked down to your Google account and the files are AES encrypted in addition.
 
