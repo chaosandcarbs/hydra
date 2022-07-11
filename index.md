@@ -10,7 +10,7 @@ If you forget the password to decrypt a file, it is non-recoverable by design.
 Don't forget your password
 
 ## Running with .exe
-I have working versions (for me) of a .exe (+ Installer) and Android APK file available in the [Releases](https://github.com/chaosandcarbs/hydra/releases). They are alternatively hosted on [Google Drive](https://drive.google.com/drive/folders/1XiMYEtU7TUfKFg8MLPEMdbtiZCadOnI_?usp=sharing).
+I have working versions of a .exe (Windows Installer) and Android APK file available in the [Releases](https://github.com/chaosandcarbs/hydra/releases). They are alternatively hosted on [Google Drive](https://drive.google.com/drive/folders/1XiMYEtU7TUfKFg8MLPEMdbtiZCadOnI_?usp=sharing).
 
 ### If you want to build your own .exe with PyInstaller
 The [kivy website](https://kivy.org/doc/stable/guide/packaging-windows.html) has the best information (read it all - it will make your life simpler). 
