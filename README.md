@@ -10,8 +10,7 @@ If you forget the password to decrypt a file, it is non-recoverable by design.
 Don't forget your password
 
 ## Running with .exe
-I have working versions (for me) of a .exe (+ Installer) and Android APK file available on drive:
-> https://drive.google.com/drive/folders/1XiMYEtU7TUfKFg8MLPEMdbtiZCadOnI_?usp=sharing 
+I have working versions (for me) of a .exe (+ Installer) and Android APK file available on [Google Drive](https://drive.google.com/drive/folders/1XiMYEtU7TUfKFg8MLPEMdbtiZCadOnI_?usp=sharing).
 
 ## Running on Android
 If you install the APK file on your phone, you'll need to enable developer options. Then you should be able to tap the APK using your file system app and install it (you may be prompted about installing apps from unknown sources). 
