@@ -6,7 +6,7 @@ Hydra can create, read, and edit AES-encrypted password file containers on disk.
 Considering automating this feature, but I find that after the initial creation and adding all my common sites, I really don't update the password files all that often. 
 
 ## Warnings
-If you forget the password to decrypt a file, it is non-recoverable by design. 
+For best use, encrypt your password file(s) with a strong, unique password. Back up your password file(s) to make sure you don't lose them. I use Google Drive, personally, to manage the password file between my desktop/laptop/android devices - but really, you should make sure the password file(s) you use are secure and backed up regularly. 
 
 ## Releases
 I have working versions of the python source code, a .exe (Windows Installer), and Android APK file available in the [Releases](https://github.com/chaosandcarbs/hydra/releases). 
