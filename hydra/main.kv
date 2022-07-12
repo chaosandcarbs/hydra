@@ -1,0 +1,452 @@
+#:kivy 1.9.0
+
+<HeaderLabel@Label>:
+    text: 'Hydra Password Manager'
+    font_size: self.width/20
+    background_color: 0.15,0.2,0.6,0
+    size_hint: 1,0.1
+
+<HydraButton@Button>:
+    background_normal: 'images/hydra_button.png'
+    background_down: 'images/hydra_button_down.png'
+    border: 30, 30, 30, 30
+    
+<hydraManager>:
+    hydraMain:
+    hydraPassword:
+    hydraPasswordNew:
+    hydraView:
+
+<Screen>:
+    on_leave: root.manager.lastScreen = self.name
+
+<hydraMain>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: self.width/25
+        spacing: self.width/40
+
+        HeaderLabel:
+
+        BoxLayout:
+            id: mainbox
+            orientation: 'vertical'
+            padding: 20
+            spacing: 30
+            size_hint: 1,0.55
+            row_force_default: True
+            row_default_height: dp(10)
+            HydraButton:
+                id: openfilebutton
+                text: 'Open Existing Hydra File'
+                on_release: root.showLoadFile()
+            HydraButton:
+                id: newfilebutton
+                text: 'Create New Hydra File'
+                on_release: root.showNewFile()
+            HydraButton:
+                id: exitbutton
+                text: 'Exit Hydra'
+                on_release: app.stop()
+        Label:
+            id: mainfooterlabel
+            size_hint: 1,0.3
+            font_size: self.width/30
+            text: root.msgText
+
+
+<LoadDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        padding: dp(8)
+        spacing: dp(8)
+
+        FileChooserListView:
+            id: filechooser
+            rootpath: app.filePathStart
+
+        BoxLayout:
+            size_hint: 1,.13
+            padding: dp(5)
+            spacing: dp(5)
+            HydraButton:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            HydraButton:
+                text: "Load"
+                on_release: root.loadFile(filechooser.path, filechooser.selection)
+
+
+<NewDialog>:
+    text_input: fileInput
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        padding: dp(8)
+        spacing: dp(8)
+
+        FileChooserListView:
+            id: filechooser
+            rootpath: app.filePathStart
+
+        TextInput:
+            id: fileInput
+            size_hint: 1,.1
+            multiline: False
+
+        BoxLayout:
+            size_hint: 1,.15
+            padding: dp(5)
+            spacing: dp(5)
+            HydraButton:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            HydraButton:
+                text: "Next"
+                on_release: root.newFile(filechooser.path,fileInput.text)
+
+<SaveDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        padding: dp(8)
+        spacing: dp(8)
+
+        Label:
+            id: verify
+            size_hint: 1,.5
+            text: 'Save File and Return?'
+
+        BoxLayout:
+            size_hint: 1,.5
+            HydraButton:
+                text: "Save"
+                on_release: root.saveFile()
+            HydraButton:
+                text: "Cancel"
+                on_release: root.cancel()
+
+
+<NewPassDialog>:
+    site_input: siteInput
+    uname_input: unameInput
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        padding: dp(8)
+        spacing: dp(8)
+
+        GridLayout:
+            size_hint: 1,0.8
+            cols: 2
+            row_force_default: True
+            row_default_height: dp(30)
+            cols_minimum: {0:50,1:200}
+            spacing: dp(5)
+
+            Label:
+                id: siteLabel
+                text: "Service Name:"
+            TextInput:
+                id: siteInput
+                multiline: False
+                write_tab: False
+                text: root.site_input
+            Label:
+                id: unameLabel
+                text: "User Name:"
+            TextInput:
+                id: unameInput
+                multiline: False
+                write_tab: False
+                text: root.uname_input
+            Label:
+                id: lenLabel
+                text: "PW Length: "+str(lenInput.value)
+            Slider:
+                id: lenInput
+                min: 5
+                max: 50
+                step: 1
+                value: 20
+                orientation: 'horizontal'
+            Label:
+                id: compLabel
+                text: "Complexity:"
+            Spinner:
+                id: complexitySpinner
+                text: "Alphanumeric"
+                values: "Alphanumeric [A-Za-z0-9]", "Basic [A-Za-z0-9!#&]", "Full [A-Za-z0-9()[]!#&$+-,.]", "Ludicrous Mode"
+        GridLayout:
+            size_hint: 1,0.2
+            cols: 2
+            row_force_default: True
+            row_default_height: dp(35)
+            spacing: dp(4)
+            padding: dp(4)
+            HydraButton:
+                text: "Create"
+                on_release: root.newPass(siteInput.text,unameInput.text,lenInput.value,complexitySpinner.text)
+            HydraButton:
+                text: "Cancel"
+                on_release: root.cancel()
+
+<ViewPassDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+        padding: dp(8)
+        spacing: dp(8)
+
+        TextInput:
+            id: siteDisplay
+            size_hint: 1,0.2
+            multiline: False
+            readonly: True
+            text: root.site
+
+        GridLayout:
+            cols: 2
+            size_hint: 1, .4
+            row_force_default: True
+            row_default_height: dp(35)
+            spacing: dp(7)
+            padding: dp(5)
+            cols_minimum: {0:150,1:75}
+            TextInput:
+                id: unameDisplay
+                multiline: False
+                text: root.uname
+
+            HydraButton:
+                id: ucopybtn
+                text: 'Copy'
+                on_release: root.copy(siteDisplay.text,'name')
+
+            TextInput:
+                id: pwordDisplay
+                multiline: False
+                readonly: True
+                text: root.pword
+
+            HydraButton:
+                id: pcopybtn
+                text: 'Copy'
+                on_release: root.copy(siteDisplay.text,'pass')
+
+        HydraButton:
+            size_hint: 1, .17
+            text: 'Generate New Password'
+            on_release: root.newpass(siteDisplay.text)
+            
+                
+        GridLayout:
+            cols: 2
+            size_hint: 1, .2
+            row_force_default: True
+            row_default_height: dp(35)
+            spacing: dp(7)
+            padding: dp(2)
+            cols_minimum: {0:150,1:75}
+            HydraButton:
+                id: updatebtn
+                text: 'Update Username'
+                on_release: root.save(siteDisplay.text, unameDisplay.text, pwordDisplay.text)
+                
+            HydraButton:
+                id: cancelbtn
+                text: 'Close'
+                on_release: root.cancel()
+
+<DelPassDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+        padding: dp(8)
+        spacing: dp(8)
+
+        Label:
+            id: warnDisplay
+            size_hint: 1,.3
+            text: 'Are you sure you want to delete:'
+
+        Label:
+            id: siteDisplay
+            size_hint: 1,.3
+            text: root.site
+
+        BoxLayout:
+            size_hint: 1,.3
+            HydraButton:
+                id: copybtn
+                text: 'Delete'
+                on_release: root.delete(siteDisplay.text)
+            HydraButton:
+                id: cancelbtn
+                text: 'Cancel'
+                on_release: root.cancel()
+
+
+
+<hydraPassword>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(8)
+        spacing: dp(8)
+
+        HeaderLabel:
+
+        GridLayout:
+            id: loginForm
+            cols: 2
+            size_hint: 1,0.1
+            row_force_default: True
+            row_default_height: dp(30)
+            Label:
+                text: 'Please Enter Password'
+            TextInput:
+                id: loginInput
+                password: True
+                multiline: False
+                write_tab: False
+                on_text_validate: root.onPwd()
+        HydraButton:
+            id: loginbutton
+            text: 'Unlock'
+            size_hint: 1,0.1
+            on_release: root.hLogin()
+
+        HydraButton:
+            id: cancelbutton
+            text: 'Return to Menu'
+            size_hint: 1,0.1
+            on_release:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'main'
+
+        Label:
+            id: loginspacelabel
+            text: ''
+            size_hint: 1,0.45
+
+        Label:
+            id: loginfooterlabel
+            size_hint: 1,0.1
+            text: root.msgText
+
+<hydraPasswordNew>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(8)
+        spacing: dp(8)
+
+        HeaderLabel:
+
+        GridLayout:
+            id: loginForm
+            cols: 2
+            size_hint: 1,0.1
+            row_force_default: True
+            row_default_height: dp(30)
+            Label:
+                text: 'Please Enter Password'
+            TextInput:
+                id: loginInput
+                password: True
+                multiline: False
+                write_tab: False
+                on_text_validate: root.onPwd()
+            Label:
+                text: 'Please Verify Password'
+            TextInput:
+                id: loginInput2
+                password: True
+                multiline: False
+                write_tab: False
+                on_text_validate: root.onPwd2()
+        HydraButton:
+            id: loginbutton
+            text: 'Set Password'
+            size_hint: 1,0.1
+            on_release: root.hLogin()
+
+        HydraButton:
+            id: cancelbutton
+            text: 'Return to Menu'
+            size_hint: 1,0.1
+            on_release:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'main'
+
+        Label:
+            id: loginspacelabel
+            text: ''
+            size_hint: 1,0.45
+
+        Label:
+            id: loginfooterlabel
+            size_hint: 1,0.1
+            text: root.msgText
+
+
+<hydraView>:
+    passwordList: passwordList
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(8)
+        spacing: dp(5)
+
+        HeaderLabel:
+
+        GridLayout:
+            id: buttonList
+            cols: 3
+            size_hint: 1, 0.15
+            row_force_default: True
+            row_default_height: dp(40)
+            HydraButton:
+                id: newButton
+                text: 'New Password'
+                on_release: root.showNewPass()
+
+            HydraButton:
+                id: saveButton
+                text: 'Save File'
+                on_release: root.showSaveFile()
+
+            HydraButton:
+                id: exitButton
+                text: 'Exit'
+                on_release: root.manager.current = 'main'
+
+        ScrollView:
+            id: passwordScroll
+            #do_scroll_x: False
+            do_scroll_y: True
+            size_hint: 1, 1
+            padding: dp(8)
+            GridLayout:
+                id: passwordList
+                size_hint: 1,None
+                cols: 2
+                cols_minimum: {0:300,1:100}
+                #cols: 3
+                #size_hint_y: None
+                height: self.minimum_height
+                row_force_default: True
+                row_default_height: dp(33)
+                spacing: dp(8)
+
+        Label:
+            id: loginfooterlabel
+            size_hint: 1,0.1
+            text: root.msgText
