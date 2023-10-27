@@ -1,16 +1,16 @@
-#:kivy 1.9.0
+#:kivy 2.2.1
 
 <HeaderLabel@Label>:
     text: 'Hydra Password Manager'
-    font_size: self.width/20
-    background_color: 0.15,0.2,0.6,0
+    font_size: dp(20)
+    #background_color: 0.15,0.2,0.6,0
     size_hint: 1,0.1
 
 <HydraButton@Button>:
     background_normal: 'images/hydra_button.png'
     background_down: 'images/hydra_button_down.png'
-    border: 30, 30, 30, 30
-    
+    border: 15, 15, 15, 15
+
 <hydraManager>:
     hydraMain:
     hydraPassword:
@@ -21,21 +21,26 @@
     on_leave: root.manager.lastScreen = self.name
 
 <hydraMain>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'images/hydra_background.jpg'
     BoxLayout:
         orientation: 'vertical'
-        padding: self.width/25
-        spacing: self.width/40
+        padding: dp(10)
+        spacing: dp(20)
 
         HeaderLabel:
 
         BoxLayout:
             id: mainbox
             orientation: 'vertical'
-            padding: 20
-            spacing: 30
-            size_hint: 1,0.55
+            padding: dp(50)
+            spacing: dp(30)
+            size_hint: 1,0.6
             row_force_default: True
-            row_default_height: dp(10)
+            row_default_height: dp(20)
             HydraButton:
                 id: openfilebutton
                 text: 'Open Existing Hydra File'
@@ -51,7 +56,7 @@
         Label:
             id: mainfooterlabel
             size_hint: 1,0.3
-            font_size: self.width/30
+            font_size: dp(15)
             text: root.msgText
 
 
@@ -160,6 +165,13 @@
                 write_tab: False
                 text: root.site_input
             Label:
+                id: siteCatLabel
+                text: "Category"
+            Spinner:
+                id: catSpinner
+                text_autoupdate: True
+                values: root.cat_options
+            Label:
                 id: unameLabel
                 text: "User Name:"
             TextInput:
@@ -182,7 +194,7 @@
                 text: "Complexity:"
             Spinner:
                 id: complexitySpinner
-                text: "Alphanumeric"
+                text: "Alphanumeric [A-Za-z0-9]"
                 values: "Alphanumeric [A-Za-z0-9]", "Basic [A-Za-z0-9!#&]", "Full [A-Za-z0-9()[]!#&$+-,.]", "Ludicrous Mode"
         GridLayout:
             size_hint: 1,0.2
@@ -193,7 +205,7 @@
             padding: dp(4)
             HydraButton:
                 text: "Create"
-                on_release: root.newPass(siteInput.text,unameInput.text,lenInput.value,complexitySpinner.text)
+                on_release: root.newPass(siteInput.text,catSpinner.text,unameInput.text,lenInput.value,complexitySpinner.text)
             HydraButton:
                 text: "Cancel"
                 on_release: root.cancel()
@@ -208,19 +220,26 @@
 
         TextInput:
             id: siteDisplay
-            size_hint: 1,0.2
+            size_hint: 1,0.13
             multiline: False
             readonly: True
             text: root.site
 
         GridLayout:
             cols: 2
-            size_hint: 1, .4
+            size_hint: 1, .75
             row_force_default: True
-            row_default_height: dp(35)
+            row_default_height: dp(30)
             spacing: dp(7)
             padding: dp(5)
             cols_minimum: {0:150,1:75}
+            Spinner:
+                id: viewCatSpinner
+                text: root.cat
+                values: root.cat_options
+            Label:
+                id: viewCatLabel
+                text: "Category"
             TextInput:
                 id: unameDisplay
                 multiline: False
@@ -242,29 +261,20 @@
                 text: 'Copy'
                 on_release: root.copy(siteDisplay.text,'pass')
 
-        HydraButton:
-            size_hint: 1, .17
-            text: 'Generate New Password'
-            on_release: root.newpass(siteDisplay.text)
-            
-                
-        GridLayout:
-            cols: 2
-            size_hint: 1, .2
-            row_force_default: True
-            row_default_height: dp(35)
-            spacing: dp(7)
-            padding: dp(2)
-            cols_minimum: {0:150,1:75}
             HydraButton:
                 id: updatebtn
-                text: 'Update Username'
-                on_release: root.save(siteDisplay.text, unameDisplay.text, pwordDisplay.text)
-                
+                text: 'Update Username/Category'
+                on_release: root.save(siteDisplay.text, unameDisplay.text, pwordDisplay.text, viewCatSpinner.text)
+
             HydraButton:
                 id: cancelbtn
                 text: 'Close'
                 on_release: root.cancel()
+
+        HydraButton:
+            size_hint: 1,0.12
+            text: 'Generate New Password'
+            on_release: root.newpass(siteDisplay.text)
 
 <DelPassDialog>:
     BoxLayout:
@@ -298,6 +308,11 @@
 
 
 <hydraPassword>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'images/hydra_background.jpg'
     BoxLayout:
         orientation: 'vertical'
         padding: dp(8)
@@ -344,6 +359,11 @@
             text: root.msgText
 
 <hydraPasswordNew>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'images/hydra_background.jpg'
     BoxLayout:
         orientation: 'vertical'
         padding: dp(8)
@@ -400,9 +420,14 @@
 
 <hydraView>:
     passwordList: passwordList
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'images/hydra_background.jpg'
     BoxLayout:
         orientation: 'vertical'
-        padding: dp(8)
+        padding: dp(5)
         spacing: dp(5)
 
         HeaderLabel:
@@ -412,21 +437,54 @@
             cols: 3
             size_hint: 1, 0.15
             row_force_default: True
-            row_default_height: dp(40)
+            row_default_height: dp(35)
             HydraButton:
                 id: newButton
+                disabled: root.hideNewSaveBtns
                 text: 'New Password'
                 on_release: root.showNewPass()
 
             HydraButton:
                 id: saveButton
+                disabled: root.hideNewSaveBtns
                 text: 'Save File'
                 on_release: root.showSaveFile()
 
             HydraButton:
                 id: exitButton
-                text: 'Exit'
+                text: root.exitText
                 on_release: root.manager.current = 'main'
+
+        GridLayout:
+            id: pageNav
+            cols: 5
+            size_hint: 1, 0.15
+            row_force_default: True
+            row_default_height: dp(35)
+
+            HydraButton:
+                id: prevPage
+                text: '<-'
+                disabled: root.hideNewSaveBtns
+                on_release: root.pageLeft()
+
+            Label:
+                id: blankLabel
+                text: ''
+
+            Label:
+                id: pageLabel
+                text: root.pageText
+
+            Label:
+                id: blankLabel2
+                text: ''
+
+            HydraButton:
+                id: nextPage
+                text: '->'
+                disabled: root.hideNewSaveBtns
+                on_release: root.pageRight()
 
         ScrollView:
             id: passwordScroll

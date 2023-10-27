@@ -20,26 +20,32 @@ Hydra - A simple password manager that stores passwords using AES
 
 '''
 from __future__ import unicode_literals
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 '''
     Imports
 '''
+import sys
+import os
 from functools import partial
 from kivy.app import App
 from kivy.core.clipboard import Clipboard, CutBuffer
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.pagelayout import PageLayout
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.label import Label
 from kivy.uix.button import Button
-from kivy.properties import StringProperty, ObjectProperty
+from kivy.properties import StringProperty, ObjectProperty, BooleanProperty
 from kivy.uix.popup import Popup
 from kivy.utils import platform
 from kivy.graphics import Rectangle
+from kivy.metrics import dp
 from Crypto.Cipher import AES
-import os, random, struct, hashlib, pickle, logging
+import random, struct, hashlib, pickle, logging
 from os.path import dirname
 
 
@@ -66,8 +72,6 @@ class hydraMain(Screen):
         self.msgText = 'Welcome to Hydra!'
         if(self.manager):
             logging.info('Platform: '+self.manager.platform)
-        with self.canvas.before:
-            Rectangle(source=os.path.join('images','hydra_background.jpg'),pos=self.pos,size=Window.size)
 
 
     def showLoadFile(self):
@@ -144,8 +148,6 @@ class hydraPasswordNew(Screen):
         global fileName
         global filePath
         self.msgText = 'Please Enter a Password For:'+fileName
-        with self.canvas.before:
-            Rectangle(source=os.path.join('images','hydra_background.jpg'),pos=self.pos,size=Window.size)
 
     def onPwd(self, *args):
         self.hLogin()
@@ -174,8 +176,6 @@ class hydraPassword(Screen):
         super(hydraPassword, self).__init__(**kwargs)
         global fileName
         self.msgText = 'Please Enter a Password For: '+fileName
-        with self.canvas.before:
-            Rectangle(source=os.path.join('images','hydra_background.jpg'),pos=self.pos,size=Window.size)
 
     def onPwd(self, *args):
         self.hLogin()
@@ -205,14 +205,19 @@ class hydraView(Screen):
     '''
     pwdText = StringProperty()
     msgText = StringProperty()
+    exitText = StringProperty()
+    pageText = StringProperty()
     pList = {}
     sv = ObjectProperty()
+    hideNewSaveBtns = BooleanProperty(True)
+    categories = ['Banking', 'Bills', 'Email', 'Shopping', 'Social Media', 'Entertainment', 'Uncategorized']
 
     def __init__(self, **kwargs):
         ''' standard init '''
         super(hydraView, self).__init__(**kwargs)
-        with self.canvas.before:
-            Rectangle(source=os.path.join('images','hydra_background.jpg'),pos=self.pos,size=Window.size)
+        self.hideNewSaveBtns = True
+        self.exitText = 'Exit'
+        #self.viewCatSpinner.values = self.categories
 
     def on_leave(self, *args):
         ''' on_leave event - make sure we set the variables to empty '''
@@ -254,26 +259,48 @@ class hydraView(Screen):
         else:
             self.msgText = 'Something Went Wrong! No Manager Object'
 
-    def listUpdate(self):
+    def pageRight(self):
+        maxPage = len(self.categories)-1
+        curPage = self.categories.index(self.pageText)
+        if curPage < maxPage:
+            self.pageText = self.categories[self.categories.index(self.pageText)+1]
+            self.listUpdate(self.categories.index(self.pageText))
+
+    def pageLeft(self):
+        maxPage = len(self.categories)-1
+        curPage = self.categories.index(self.pageText)
+        if curPage > 0:
+            self.pageText = self.categories[self.categories.index(self.pageText)-1]
+            self.listUpdate(self.categories.index(self.pageText))
+
+    def listUpdate(self,catIndex=0):
         ''' listUpdate() - Updates the password list in hydraView '''
         logging.info('Updating list of: '+str(len(self.pList)))
         viewWidth = 0.75
         delWidth = 0.25
 
+        self.pageText = self.categories[catIndex]
+
         self.clean()
         if(len(self.pList.keys()) > 0):
             for site in self.pList.keys():
-                logging.info('Adding Site: '+site)
-                viewCallback = partial(self.viewPass, site)
-                self.passwordList.add_widget(Button(text=site,
-                                            background_normal=os.path.join('images','pw_button.png'),
-                                            background_down=os.path.join('images','pw_button_down.png'),
-                                            on_release=viewCallback))
-                delCallback = partial(self.delPass, site)
-                self.passwordList.add_widget(Button(text='Delete',
-                                            background_normal=os.path.join('images','pw_button.png'),
-                                            background_down=os.path.join('images','pw_button_down.png'),
-                                            on_release=delCallback))
+                if(('Category' in self.pList[site].keys() and
+                    self.pList[site]['Category'] == self.categories[catIndex]) or
+                    self.categories[catIndex] == 'Uncategorized' and
+                    ('Category' not in self.pList[site].keys() or
+                    self.pList[site]['Category'] == self.categories[catIndex])):
+                    viewCallback = partial(self.viewPass, site)
+                    self.passwordList.add_widget(
+                        Button(text=site,
+                            background_normal=os.path.join('images','pw_button.png'),
+                            background_down=os.path.join('images','pw_button_down.png'),
+                            on_release=viewCallback))
+                    delCallback = partial(self.delPass, site)
+                    self.passwordList.add_widget(
+                        Button(text='Delete',
+                            background_normal=os.path.join('images','pw_button.png'),
+                            background_down=os.path.join('images','pw_button_down.png'),
+                            on_release=delCallback))
 
     def copyPass(self, *args):
         if args[1] == 'name':
@@ -283,13 +310,15 @@ class hydraView(Screen):
             logging.info('Copying Password: '+args[0])
             Clipboard.copy(self.pList[args[0]]['Password'])
 
-    def updatePass(self, site, username, password):
-        self.pList[site] = { 'Username': username, 'Password':password }
+    def updatePass(self, site, username, password, category):
+        self.pList[site] = { 'Username': username, 'Password':password, 'Category':category }
+        self.listUpdate(self.categories.index(self.pageText))
         self.dismissPopup()
 
     def clean(self):
         logging.info('Clearing old widgets')
         self.passwordList.clear_widgets()
+
 
     def delPass(self, *args):
         content = DelPassDialog(site=args[0],delete=self.deletePassword, cancel=self.dismissPopup)
@@ -300,28 +329,32 @@ class hydraView(Screen):
     def deletePassword(self, *args):
         logging.info('Deleting: '+args[0])
         del self.pList[args[0]]
-        self.listUpdate()
+        self.listUpdate(self.categories.index(self.pageText))
         self.dismissPopup()
-
 
     def viewPass(self, *args):
         vsite = args[0]
         vpword = ''
         vuname = ''
+        vcat = 'Uncategorized'
         if type(self.pList[args[0]]) is dict:
             #dict type - new format
             vuname = self.pList[args[0]]['Username']
             vpword = self.pList[args[0]]['Password']
+            if 'Category' in self.pList[args[0]].keys():
+                vcat = self.pList[args[0]]['Category']
+            else:
+                vcat = self.categories[-1] # Uncategorized
         elif type(self.pList[args[0]]) is str:
             #list type - old format
             vpword = self.pList[args[0]]
         else:
             logging.error("password list unreadable!")
-        content = ViewPassDialog(site=vsite,uname=vuname,pword=vpword,
-                                copy=self.copyPass, save=self.updatePass,
+        content = ViewPassDialog(site=vsite,uname=vuname,pword=vpword,cat=vcat,
+                                copy=self.copyPass, save=self.updatePass, cat_options=self.categories,
                                 newpass=self.showNewPass,cancel=self.dismissPopup)
         self._popup = Popup(title="View Password", content=content,
-                            size_hint=(0.7,0.38))
+                            size_hint=(0.7,0.45))
         self._popup.open()
 
     def showSaveFile(self):
@@ -330,25 +363,32 @@ class hydraView(Screen):
                             size_hint=(0.7,0.25))
         self._popup.open()
 
-    def newPass(self, site, username, pwlen, complexity):
+    def newPass(self, site, category, username, pwlen, complexity):
         if(site != ''):
-            self.pList[site] = { 'Username': username, 'Password':self.genPass(int(pwlen),complexity)}
+            self.pList[site] = { 'Username': username, 'Category':category,'Password':self.genPass(int(pwlen),complexity)}
             self.dismissPopup()
-            self.listUpdate()
+            self.listUpdate(self.categories.index(self.pageText))
 
     def showNewPass(self, *args):
         site = ''
         uname = ''
+        cat = ''
+        title='Create New Password'
         if args:
             #if we're here, we are updating an existing password
             site = args[0]
             uname = self.pList[site]['Username']
+            if 'Category' in self.pList[site].keys():
+                cat = self.pList[site]['Category']
+            else:
+                cat = 'Uncategorized'
+            title='Update Password'
             #dismiss the view password popup
             self.dismissPopup()
-        content = NewPassDialog(newPass=self.newPass,site_input=site,
-                                uname_input=uname,cancel=self.dismissPopup)
-        self._popup = Popup(title="Creat New Password", content=content,
-                            size_hint=(0.7,0.35))
+        content = NewPassDialog(newPass=self.newPass,site_input=site,cat_input=cat,
+                                uname_input=uname,cancel=self.dismissPopup,cat_options = self.categories)
+        self._popup = Popup(title=title, content=content,
+                            size_hint=(0.7,0.45))
         self._popup.open()
 
     def genPass(self, length, complexity):
@@ -356,17 +396,16 @@ class hydraView(Screen):
         #TODO: make length/alphabet variable via setting.
         #   Note that length generally trumps complexity; this should suffice for now
         alphabet = ''
-        if complexity == 'Alphanumeric [A-Za-z0-9]':
-            alphabet = 'abcdefghijklmnopqrstuvwxzyABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-        elif complexity == 'Basic [A-Za-z0-9!#&$]':
+        if complexity == 'Basic [A-Za-z0-9!#&$]':
             alphabet = 'abcdefghijklmnopqrstuvwxzyABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#&$'
         elif complexity == 'Full [A-Za-z0-9()[]!#&$+-,.]':
             alphabet = 'abcdefghijklmnopqrstuvwxzyABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789()[]!#&$+-,.'
-        else:
+        elif complexity == 'Ludicrous Mode':
             #just fuck me up, fam
             asciiMax = 126
             alphabet = [chr(x) for x in range(0,asciiMax+1) if chr(x).isprintable()]
-
+        else: # alphanumeric is the default, and has widest support (but weakest)
+            alphabet = 'abcdefghijklmnopqrstuvwxzyABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
         pw = ''
         for i in range(length):
             pw = pw + alphabet[random.randrange(len(alphabet))]
@@ -406,9 +445,15 @@ class hydraView(Screen):
                 self.pList = pickle.load(oHandle)
             oHandle.close()
             logging.info('Closing pickle')
+            # things went well, allow all buttons
+            self.hideNewSaveBtns = False
+            self.exitText = 'Exit'
         except (pickle.UnpicklingError, ImportError, EOFError, IndexError, TypeError):
-            logging.warn('Password incorrect or pickling failed')
+            logging.warning('Password incorrect or pickling failed')
             self.msgText = "Bad Password: The password you entered failed decryption, or pickling failed"
+            # things didn't turn out as planned; hide the save/new buttons, update text
+            self.hideNewSaveBtns = True
+            self.exitText = 'Back'
         logging.info('Removing temp pickle file')
         os.remove(decFile)
         logging.info('Updating list')
@@ -461,6 +506,8 @@ class ViewPassDialog(FloatLayout):
     site = ObjectProperty(None)
     uname = ObjectProperty(None)
     pword = ObjectProperty(None)
+    cat = ObjectProperty(None)
+    cat_options = ObjectProperty(None)
     copy = ObjectProperty(None)
     newpass = ObjectProperty(None)
     save = ObjectProperty(None)
@@ -470,8 +517,10 @@ class NewPassDialog(FloatLayout):
     newPass = ObjectProperty(None)
     site_input = ObjectProperty(None)
     uname_input = ObjectProperty(None)
+    cat_input = ObjectProperty(None)
+    cat_options = ObjectProperty(None)
     cancel = ObjectProperty(None)
-6
+
 class DelPassDialog(FloatLayout):
     site = ObjectProperty(None)
     delete = ObjectProperty(None)
@@ -503,7 +552,7 @@ class hydraApp(App):
         super(hydraApp, self).__init__(**kwargs)
 
     def build(self):
-        self.title = 'Hydra v0.1'
+        self.title = 'Hydra v0.2'
         Builder.load_file(os.path.join(dirname(__file__), 'main.kv'))
         self.sm = ScreenManager()
         self.sm.lastScreen = ''
@@ -518,7 +567,7 @@ class hydraApp(App):
         return self.sm
 
     def platformChecks(self, *args):
-        if platform == 'android':
+        if platform == 'android' or platform == 'ios':
             self.filePathStart = '/storage/emulated/0/'
             from android.permissions import request_permissions, Permission, check_permission
             from android import loadingscreen
@@ -533,7 +582,7 @@ class hydraApp(App):
             Window.fullscreen = 'auto'
         elif platform == 'win':
             self.filePathStart = '/'
-            Window.size = (600,800)
+            Window.size = (550,700)
             try:
                 #for bundling in a .exe - will fail if run as a script
                 import pyi_splash
@@ -543,6 +592,7 @@ class hydraApp(App):
         else:
             self.filePathStart = '/'
             Window.size = (600,800)
+            logging.info('Environment unclear?')
         self.curPlatform = platform
 
     def on_request_close(self, *args):
