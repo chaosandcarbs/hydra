@@ -20,7 +20,7 @@ Hydra - A simple password manager that stores passwords using AES
 
 '''
 from __future__ import unicode_literals
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 '''
     Imports
@@ -250,6 +250,7 @@ class hydraView(Screen):
             else:
                 #no values to load!
                 logging.info('New file - nothing to load')
+                self.hideNewSaveBtns = False
                 self.manager.get_screen(self.manager.lastScreen).ids.loginInput.text = ''
                 self.manager.get_screen(self.manager.lastScreen).ids.loginInput2.text = ''
                 pass
@@ -282,7 +283,7 @@ class hydraView(Screen):
         self.pageText = self.categories[catIndex]
 
         self.clean()
-        if(len(self.pList.keys()) > 0):
+        if(len(self.pList.keys()) > 0 and isinstance(self.pList,dict)):
             for site in self.pList.keys():
                 if(('Category' in self.pList[site].keys() and
                     self.pList[site]['Category'] == self.categories[catIndex]) or
@@ -354,13 +355,13 @@ class hydraView(Screen):
                                 copy=self.copyPass, save=self.updatePass, cat_options=self.categories,
                                 newpass=self.showNewPass,cancel=self.dismissPopup)
         self._popup = Popup(title="View Password", content=content,
-                            size_hint=(0.7,0.45))
+                            size_hint=(0.85,0.45))
         self._popup.open()
 
     def showSaveFile(self):
         content = SaveDialog(saveFile=self.saveFile,cancel=self.dismissPopup)
         self._popup = Popup(title="Save File", content=content,
-                            size_hint=(0.7,0.25))
+                            size_hint=(0.75,0.25))
         self._popup.open()
 
     def newPass(self, site, category, username, pwlen, complexity):
@@ -388,7 +389,7 @@ class hydraView(Screen):
         content = NewPassDialog(newPass=self.newPass,site_input=site,cat_input=cat,
                                 uname_input=uname,cancel=self.dismissPopup,cat_options = self.categories)
         self._popup = Popup(title=title, content=content,
-                            size_hint=(0.7,0.45))
+                            size_hint=(0.85,0.45))
         self._popup.open()
 
     def genPass(self, length, complexity):
