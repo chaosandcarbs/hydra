@@ -1,7 +1,7 @@
 title: Hydra Password Manager
 theme: jekyll-theme-midnight
 show_downloads: true 
-zip_url: https://github.com/chaosandcarbs/hydra/archive/refs/tags/v0.3.0.zip
-tar_url: https://github.com/chaosandcarbs/hydra/archive/refs/tags/v0.3.0.tar.gz
-win_url: https://github.com/chaosandcarbs/hydra/releases/download/v0.3.0/Hydra_installer.exe
-android_url: https://github.com/chaosandcarbs/hydra/releases/download/v0.3.0/hydra-0.3.0-arm64-debug.apk
+zip_url: https://github.com/chaosandcarbs/hydra/archive/refs/tags/v0.3.2.zip
+tar_url: https://github.com/chaosandcarbs/hydra/archive/refs/tags/v0.3.2.tar.gz
+win_url: https://github.com/chaosandcarbs/hydra/releases/download/v0.3.2/hydra-0.3.2.exe
+android_url: https://github.com/chaosandcarbs/hydra/releases/download/v0.3.2/hydra-0.3.2-arm64-v8a_armeabi-v7a-debug.apk

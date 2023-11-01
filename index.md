@@ -30,15 +30,10 @@ You'll also need Visual Studio build tools for C++. They can be found on [Micros
 Lastly, you'll want to make sure you have the requisite packages;
 ```
 python -m pip install --upgrade pip wheel setuptools
-python -m pip install docutils pygments pypiwin32 
-python -m pip install kivy.deps.sdl2 kivy.deps.glew kivy.deps.gstreamer
-python -m pip install kivy.deps.angle
-python -m pip install kivy kivy_examples
-python -m pip install Pillow
-python -m pip install cython
+python -m pip install -r requirements.txt
 ```
 
-Building for Windows is currently using [PyInstaller](https://pyinstaller.org/en/stable/) (to turn the python3 code into a .exe), and a trial version of [Advanced Installer](https://www.advancedinstaller.com/) (to package everything up and create the installer file).
+Building for Windows is currently using [PyInstaller](https://pyinstaller.org/en/stable/) (to turn the python3 code into a .exe), and a trial version of [Advanced Installer](https://www.advancedinstaller.com/) (to package everything up and create the installer file). Note that if you run in a linux environment, some of the packages may throw an error on pip install, as they are only needed (and installable) in Windows.
 
 ## Running on Android
 If you install the APK file on your phone, you'll need to enable [developer options](https://developer.android.com/studio/debug/dev-options). Then you should be able to tap the APK using your file system app and install it (you may be prompted about installing apps from unknown sources). 
