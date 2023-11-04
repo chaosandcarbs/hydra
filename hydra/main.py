@@ -20,7 +20,7 @@ Hydra - A simple password manager that stores passwords using AES
 
 '''
 from __future__ import unicode_literals
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 '''
     Imports
@@ -72,6 +72,7 @@ class hydraMain(Screen):
         self.msgText = 'Welcome to Hydra!'
         if(self.manager):
             logging.info('Platform: '+self.manager.platform)
+            Window.raise_window()
 
 
     def showLoadFile(self):
@@ -553,7 +554,7 @@ class hydraApp(App):
         super(hydraApp, self).__init__(**kwargs)
 
     def build(self):
-        self.title = 'Hydra v0.2'
+        self.title = 'Hydra v0.3.3'
         Builder.load_file(os.path.join(dirname(__file__), 'main.kv'))
         self.sm = ScreenManager()
         self.sm.lastScreen = ''
@@ -590,6 +591,11 @@ class hydraApp(App):
                 pyi_splash.close()
             except:
                 logging.info('Could not import pyi_splash...running as script?')
+            try:
+                self.icon = 'images/hydra_icon2.ico'
+            except:
+                logging.info('Could not load icon')
+            Window.raise_window()
         else:
             self.filePathStart = '/'
             Window.size = (600,800)
